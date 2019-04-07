@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pitchgram</string>
+    <string name="keyboard">keyboard</string>
 </resources>

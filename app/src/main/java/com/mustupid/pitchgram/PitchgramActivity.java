@@ -18,12 +18,7 @@ public class PitchgramActivity extends AppCompatActivity {
 	private final Handler mHandler = new Handler();
 	private final Runnable mCallback = new Runnable() {
 		public void run() {
-			float cents = mPitchDetector.getCents();
-			if (cents == 0) {
-				mCanvas.addPoint(-1);
-				return;
-			}
-			mCanvas.addPoint(cents);
+			mCanvas.addPoint(mPitchDetector.getCents(), mPitchDetector.getConfidence());
 		}
 	};
 	private PitchgramView mCanvas;
