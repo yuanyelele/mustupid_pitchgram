@@ -16,7 +16,6 @@ class PitchDetector extends Thread {
 	private static final float REFERENCE_FREQUENCY = 440;
 	private static final float REFERENCE_NOTE = 69;
 	static final int LOWEST_NOTE = 36; // C2
-	private static final int KEYBOARD_LOWEST = 21;
 	private static final float BASE_FREQUENCY = midi_to_frequency(LOWEST_NOTE);
 
 	private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
@@ -27,12 +26,13 @@ class PitchDetector extends Thread {
 	private final double CENTS_IN_OCTAVE = 1200;
 	private final double A = CENTS_IN_OCTAVE / Math.log(2);
 	private final double B = -CENTS_IN_OCTAVE * Math.log(BASE_FREQUENCY) / Math.log(2);
+	private final int STEP = 500;
 
 	private final float THRESHOLD = 0.1f;
 
 	private AudioRecord mAudioRecorder;
 	private final Handler mHandler;
-	private Runnable mCallback;
+	private final Runnable mCallback;
 	private float mCents;
 	private float mConfidence;
 
@@ -51,13 +51,13 @@ class PitchDetector extends Thread {
 		}
 		mAudioRecorder.startRecording();
 		short[] samples = new short[BUFFER_SIZE];
-		int step = BUFFER_SIZE / 4;
-		while (mAudioRecorder.read(samples, samples.length - step, step) > 0) {
+
+		while (mAudioRecorder.read(samples, samples.length - STEP, STEP) > 0) {
 			Result result = detectPitch(samples);
 			mCents = (float) (A * Math.log(result.frequency) + B);
 			mConfidence = result.confidence;
 			mHandler.post(mCallback);
-			System.arraycopy(samples, step, samples, 0, samples.length - step);
+			System.arraycopy(samples, STEP, samples, 0, samples.length - STEP);
 		}
 	}
 
@@ -78,17 +78,19 @@ class PitchDetector extends Thread {
 	}
 
 	private float parabolic_interpolation_x(float a, float b, float c) {
-		if (a == b && b == c) {
-			return b;
+		float d = a + c - b * 2;
+		if (d == 0) {
+			return 0;
 		}
-		return (a - c) / (a + c - 2 * b) / 2;
+		return (a - c) / d / 2;
 	}
 
 	private float parabolic_interpolation_y(float a, float b, float c) {
-		if (a == b && b == c) {
+		float d = a + c - b * 2;
+		if (d == 0) {
 			return b;
 		}
-		return b - (a - c) * (a - c) / (a + c - 2 * b) / 8;
+		return b - (a - c) * (a - c) / d / 8;
 	}
 
 	private Result detectPitch(short[] sample) {
@@ -132,15 +134,17 @@ class PitchDetector extends Thread {
 					float y = parabolic_interpolation_y(cmn[i - 1], cmn[i], cmn[i + 1]);
 					if (y < minimum) {
 						period = i;
-						minimum = y;
 						result.confidence = 1 - y;
+						minimum = y;
 					}
 				}
 			}
 		}
 
-		result.confidence = Math.min(1, result.confidence);
 		result.frequency = SAMPLE_RATE / (period + parabolic_interpolation_x(diff[period - 1], diff[period], diff[period + 1]));
+		if (result.frequency <= 0)
+			result.frequency = SAMPLE_RATE;
+		result.confidence = Math.min(1, result.confidence);
 
 		return result;
 	}

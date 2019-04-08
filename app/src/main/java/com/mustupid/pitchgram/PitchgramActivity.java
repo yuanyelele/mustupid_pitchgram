@@ -18,22 +18,23 @@ public class PitchgramActivity extends AppCompatActivity {
 	private final Handler mHandler = new Handler();
 	private final Runnable mCallback = new Runnable() {
 		public void run() {
-			mCanvas.addPoint(mPitchDetector.getCents(), mPitchDetector.getConfidence());
+			mPitchgramView.addPoint(mPitchDetector.getCents(), mPitchDetector.getConfidence());
+			mCentsView.addCents(mPitchDetector.getCents(), mPitchDetector.getConfidence());
 		}
 	};
-	private PitchgramView mCanvas;
-
+	private PitchgramView mPitchgramView;
+	private CentsView mCentsView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pitchgram_activity);
 
-		mCanvas = findViewById(R.id.view);
+		mPitchgramView = findViewById(R.id.pitchgram_view);
+		mCentsView = findViewById(R.id.cents_view);
 
 		// Make volume button always control just the media volume
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
 	}
 
 	@Override
