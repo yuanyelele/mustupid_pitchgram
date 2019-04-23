@@ -8,48 +8,55 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class CentsView extends View {
-    private float mDeviation;
-    private int mColor;
-    private float mCents;
-    private static final float SMOOTHNESS = 0.95f;
-    private final Paint mPaint = new Paint();
-    private static final float THRESHOLD = 0.25f;
-    private static final int[] COLORS = new int[] {
-            0xFFB71C1C, 0xFFD32F2F, 0xFFF44336, 0xFFE57373, 0xFFFFCDD2,
-            0xFFBBDEFB, 0xFF64B5F6, 0xFF2196F3, 0xFF1976D2, 0xFF0D47A1
+
+    private final int[] COLORS = new int[] {
+            getResources().getColor(R.color.red_900),
+            getResources().getColor(R.color.red_700),
+            getResources().getColor(R.color.red_500),
+            getResources().getColor(R.color.red_300),
+            getResources().getColor(R.color.red_100),
+            getResources().getColor(R.color.blue_100),
+            getResources().getColor(R.color.blue_300),
+            getResources().getColor(R.color.blue_500),
+            getResources().getColor(R.color.blue_700),
+            getResources().getColor(R.color.blue_900),
     };
-    private static final float SIZE = 16;
+    private final Paint mPaint = new Paint();
+    private float mCents;
+    private int mColor;
 
     public CentsView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public CentsView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        float step = getHeight() / 10f;
-        for (int i = 0; i < 10; i++) {
+
+        float step = 1.0f * getHeight() / COLORS.length;
+        for (int i = 0; i < COLORS.length; i++) {
             mPaint.setColor(COLORS[i]);
             canvas.drawRect(0, step * i, getWidth(), step * (i + 1), mPaint);
         }
 
         mPaint.setColor(mColor);
-        float position = getHeight() * (0.5f - mDeviation);
-        canvas.drawRect(0, position - SIZE / 2, getWidth(), position + SIZE / 2, mPaint);
+        float position = getHeight() * (0.5f - (mCents - Math.round(mCents)));
+        canvas.drawRect(0, position - Settings.CENTS_INDICATOR_SIZE / 2,
+                getWidth(), position + Settings.CENTS_INDICATOR_SIZE / 2, mPaint);
     }
 
     void addCents(float cents, float confidence) {
-        if (confidence >= 1 - THRESHOLD) {
-            mCents = mCents * SMOOTHNESS + cents * (1 - SMOOTHNESS);
-            mDeviation = mCents / 100 - Math.round(mCents / 100);
+        cents /= 100;
+        if (confidence >= Settings.threshold2) {
+            if (Math.abs(mCents - cents) < 1)
+                mCents = mCents * Settings.smoothness + cents * (1 - Settings.smoothness);
+            else
+                mCents = cents;
         }
-        double gray = Math.max(0, 1 - (1 - confidence) / THRESHOLD);
-        int grayInt = (int) (gray * 255 + 0.5);
-        mColor = Color.argb(grayInt, 0, 0, 0);
+
+        float alpha = Math.max(0, 1 - (1 - confidence) / (1 - Settings.threshold2));
+        mColor = Color.argb(Math.round(alpha * 0xff), 0, 0, 0);
+
         postInvalidate();
     }
 }

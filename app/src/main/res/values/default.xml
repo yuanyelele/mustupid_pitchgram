@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="threshold1_default">90</integer>
+    <integer name="threshold2_default">75</integer>
+    <integer name="lowest_default">30</integer>
+    <integer name="window_default">600</integer>
+    <integer name="shift_default">200</integer>
+    <integer name="smoothness_default">95</integer>
+</resources>

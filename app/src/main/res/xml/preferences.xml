@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SeekBarPreference
+        android:key="threshold1"
+        android:title="@string/threshold1"
+        android:defaultValue="@integer/threshold1_default"
+        android:max="100"
+        app:min="60"
+        app:showSeekBarValue="true"
+        android:summary="@string/threshold1_summary" />
+    <SeekBarPreference
+        android:key="threshold2"
+        android:title="@string/threshold2"
+        android:defaultValue="@integer/threshold2_default"
+        android:max="100"
+        app:showSeekBarValue="true"
+        android:summary="@string/threshold2_summary" />
+    <SeekBarPreference
+        android:key="lowest"
+        android:title="@string/lowest"
+        android:defaultValue="@integer/lowest_default"
+        android:max="38"
+        app:min="21"
+        app:showSeekBarValue="true"
+        android:summary="@string/lowest_summary" />
+    <SeekBarPreference
+        android:key="window"
+        android:title="@string/window"
+        android:defaultValue="@integer/window_default"
+        android:max="1000"
+        app:min="200"
+        app:showSeekBarValue="true"
+        android:summary="@string/window_summary" />
+    <SeekBarPreference
+        android:key="shift"
+        android:title="@string/shift"
+        android:defaultValue="@integer/shift_default"
+        android:max="200"
+        app:min="10"
+        app:showSeekBarValue="true"
+        android:summary="@string/shift_summary" />
+    <SeekBarPreference
+        android:key="smoothness"
+        android:title="@string/smoothness"
+        android:defaultValue="@integer/smoothness_default"
+        android:max="99"
+        app:showSeekBarValue="true"
+        android:summary="@string/smoothness_summary" />
+</androidx.preference.PreferenceScreen>

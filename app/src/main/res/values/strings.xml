@@ -2,4 +2,19 @@
 <resources>
     <string name="app_name">Pitchgram</string>
     <string name="keyboard">keyboard</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings">settings</string>
+    <string name="reset">reset</string>
+    <string name="threshold1">Threshold1</string>
+    <string name="threshold2">Threshold2</string>
+    <string name="lowest">Lowest</string>
+    <string name="window">Window</string>
+    <string name="shift">Shift</string>
+    <string name="smoothness">Smoothness</string>
+    <string name="threshold1_summary">Threshold1 (%)</string>
+    <string name="threshold2_summary">Threshold2 (%)</string>
+    <string name="lowest_summary">Lowest note (MIDI)</string>
+    <string name="window_summary">Window size (samples)</string>
+    <string name="shift_summary">Shift size (samples)</string>
+    <string name="smoothness_summary">Cents indicator EMA smoothness (%)</string>
 </resources>

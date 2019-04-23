@@ -2,4 +2,19 @@
 <resources>
     <string name="app_name">音高谱</string>
     <string name="keyboard">键盘</string>
+    <string name="settings_title">设置</string>
+    <string name="settings">设置</string>
+    <string name="reset">重置</string>
+    <string name="threshold1">阈值1</string>
+    <string name="threshold2">阈值2</string>
+    <string name="lowest">最低音</string>
+    <string name="window">窗口</string>
+    <string name="shift">步长</string>
+    <string name="smoothness">光滑度</string>
+    <string name="threshold1_summary">阈值1 (%)</string>
+    <string name="threshold2_summary">阈值2 (%)</string>
+    <string name="lowest_summary">最低音 (MIDI)</string>
+    <string name="window_summary">窗口大小 (采样数)</string>
+    <string name="shift_summary">步长大小 (采样数)</string>
+    <string name="smoothness_summary">音分指示EMA光滑度 (%)</string>
 </resources>

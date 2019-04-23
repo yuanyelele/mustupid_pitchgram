@@ -12,27 +12,14 @@ class PitchDetector extends Thread {
 		float confidence;
 	}
 
-	private static final int SAMPLE_RATE = 22050;
-	private static final float REFERENCE_FREQUENCY = 440;
-	private static final float REFERENCE_NOTE = 69;
-	static final int LOWEST_NOTE = 36; // C2
-	private static final float BASE_FREQUENCY = midi_to_frequency(LOWEST_NOTE);
-
 	private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 	private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
-	private static final int TAU = (int) (SAMPLE_RATE / BASE_FREQUENCY);
-	private static final int WINDOW = TAU * 5;
-	private static final int BUFFER_SIZE = WINDOW + TAU;
-	private final double CENTS_IN_OCTAVE = 1200;
-	private final double A = CENTS_IN_OCTAVE / Math.log(2);
-	private final double B = -CENTS_IN_OCTAVE * Math.log(BASE_FREQUENCY) / Math.log(2);
-	private final int STEP = 500;
+	private static int TAU;
 
-	private final float THRESHOLD = 0.1f;
-
-	private AudioRecord mAudioRecorder;
 	private final Handler mHandler;
 	private final Runnable mCallback;
+
+	private AudioRecord mAudioRecorder;
 	private float mCents;
 	private float mConfidence;
 
@@ -43,21 +30,24 @@ class PitchDetector extends Thread {
 
 	@Override
 	public void run() {
-		int min_buffer_size = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING);
-		mAudioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL_CONFIG,
+		int min_buffer_size = AudioRecord.getMinBufferSize(Settings.SAMPLE_RATE, CHANNEL_CONFIG, ENCODING);
+		mAudioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, Settings.SAMPLE_RATE, CHANNEL_CONFIG,
 				ENCODING, min_buffer_size);
 		if (mAudioRecorder.getState() != AudioRecord.STATE_INITIALIZED) {
-			return; // Do nothing if not initialized
+			return;
 		}
 		mAudioRecorder.startRecording();
-		short[] samples = new short[BUFFER_SIZE];
 
-		while (mAudioRecorder.read(samples, samples.length - STEP, STEP) > 0) {
+		TAU = (int) (Settings.SAMPLE_RATE / midi_to_frequency(Settings.lowest));
+		int buffer_size = Settings.window + TAU;
+		short[] samples = new short[buffer_size];
+		// TODO: Shift: precision: smaller, performance: recursion
+		while (mAudioRecorder.read(samples, samples.length - Settings.shift, Settings.shift) > 0) {
 			Result result = detectPitch(samples);
-			mCents = (float) (A * Math.log(result.frequency) + B);
+			mCents = (float)(Math.log(result.frequency / Settings.REFERENCE_FREQUENCY) / Math.log(2) * Settings.CENTS_IN_OCTAVE);
 			mConfidence = result.confidence;
 			mHandler.post(mCallback);
-			System.arraycopy(samples, STEP, samples, 0, samples.length - STEP);
+			System.arraycopy(samples, Settings.shift, samples, 0, samples.length - Settings.shift);
 		}
 	}
 
@@ -71,10 +61,13 @@ class PitchDetector extends Thread {
 	float getCents() {
 		return mCents;
 	}
-	float getConfidence() { return mConfidence; }
+
+	float getConfidence() {
+		return mConfidence;
+	}
 
 	private static float midi_to_frequency(float midi) {
-		return (float) (Math.pow(2, (midi - REFERENCE_NOTE) / 12) * REFERENCE_FREQUENCY);
+		return (float) (Math.pow(2, (midi - Settings.REFERENCE_MIDI) / 12) * Settings.REFERENCE_FREQUENCY);
 	}
 
 	private float parabolic_interpolation_x(float a, float b, float c) {
@@ -98,7 +91,7 @@ class PitchDetector extends Thread {
 
 		float[] diff = new float[TAU];
 		for (int t = 0; t < TAU; t++)
-			for (int i = 1; i <= WINDOW; i++)
+			for (int i = 1; i <= Settings.window; i++)
 				diff[t] += Math.pow(sample[i] - sample[i + t], 2);
 
 		float[] cmn = new float[TAU];
@@ -118,7 +111,7 @@ class PitchDetector extends Thread {
 		for (int i = 1; i < TAU - 1; i++){
 			if (cmn[i] <= cmn[i - 1] && cmn[i] <= cmn[i + 1]) {
 				float y = parabolic_interpolation_y(cmn[i - 1], cmn[i], cmn[i + 1]);
-				if (y <= THRESHOLD) {
+				if (y <= 1 - Settings.threshold1) {
 					period = i;
 					result.confidence = 1 - y;
 					break;
@@ -141,9 +134,10 @@ class PitchDetector extends Thread {
 			}
 		}
 
-		result.frequency = SAMPLE_RATE / (period + parabolic_interpolation_x(diff[period - 1], diff[period], diff[period + 1]));
+		result.frequency = Settings.SAMPLE_RATE /
+				(period + parabolic_interpolation_x(diff[period - 1], diff[period], diff[period + 1]));
 		if (result.frequency <= 0)
-			result.frequency = SAMPLE_RATE;
+			result.frequency = Settings.SAMPLE_RATE;
 		result.confidence = Math.min(1, result.confidence);
 
 		return result;
