@@ -6,20 +6,21 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
+import androidx.core.content.ContextCompat;
 
 public class CentsView extends View {
 
     private final int[] COLORS = new int[] {
-            getResources().getColor(R.color.red_900),
-            getResources().getColor(R.color.red_700),
-            getResources().getColor(R.color.red_500),
-            getResources().getColor(R.color.red_300),
-            getResources().getColor(R.color.red_100),
-            getResources().getColor(R.color.blue_100),
-            getResources().getColor(R.color.blue_300),
-            getResources().getColor(R.color.blue_500),
-            getResources().getColor(R.color.blue_700),
-            getResources().getColor(R.color.blue_900),
+            ContextCompat.getColor(getContext(), R.color.red_900),
+            ContextCompat.getColor(getContext(), R.color.red_700),
+            ContextCompat.getColor(getContext(), R.color.red_500),
+            ContextCompat.getColor(getContext(), R.color.red_300),
+            ContextCompat.getColor(getContext(), R.color.red_100),
+            ContextCompat.getColor(getContext(), R.color.blue_100),
+            ContextCompat.getColor(getContext(), R.color.blue_300),
+            ContextCompat.getColor(getContext(), R.color.blue_500),
+            ContextCompat.getColor(getContext(), R.color.blue_700),
+            ContextCompat.getColor(getContext(), R.color.blue_900),
     };
     private final Paint mPaint = new Paint();
     private float mCents;
